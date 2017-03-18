@@ -1,0 +1,71 @@
+﻿<div>
+    <h2>All Products</h2>
+    @*<ul id="products"></ul>*@
+    <div id="ajax">
+
+    </div>
+</div>
+<div>
+    <h2>Search by ID</h2>
+    <input type="text" id="prodId" size="5" />
+    <input type="button" value="Search" onclick="find();" />
+    <p id="product"></p>
+</div>
+
+@section scripts{
+    
+    @*<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3,min.js"></script>*@
+    <script>
+    var uri = 'api/products';
+
+    $(document).ready(function () {
+        // send an ajax request
+        $.getJSON(uri)
+            .done(function (data) {
+                // on success, 'data' contains a list of products
+                $.each(data, function (key, item) {
+
+                    console.log(key + " : " + item.Name);
+                    // add a list item for the product
+                    $('<li>', { text: formatItem(item) }).appendTo($('#products'));
+                });
+            });
+    });
+
+    function formatItem(item) {
+        return item.Name + ': $' + item.Price;
+    }
+
+    function find() {
+        var id = $('#prodId').val();
+        $.getJSON(uri + '/' + id)
+            .done(function (data) {
+                $('#product').text(formatItem(data));
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#product').text('Error: ' + err);
+            });
+    }
+
+    function getProducts() {
+        var html = '<table>';
+        html += '<thead><hr><th>Name</th><th>Price</th></tr></thead>';
+        html += '<tbody id="products"></tbody>';
+        $('#ajax').append(html);
+
+        $.getJSON("api/products", function (data) {
+            $('#products').empty(); // clear the table body
+
+            // loop through the list of products
+            $.each(data, function (key, val) {
+                // add a table row for the product
+                var row = '<td>' + val.Name + '</td><td>' + val.Price + '</td>';
+                $('<tr/>', { text: row }) // append the name
+                    .appendTo($('#products'));
+            });
+        });
+    }
+
+    $(document).ready(getProducts);
+    </script>
+}
